@@ -8,12 +8,7 @@ export class PersonService{
     }
 
     save(person){
-        try {
             return axios.post(this.url + "save", person).then(res => res.data);        
-        } catch (error) {
-            return swal("No");
-        }
-        
     }
 
     leap(birth){
