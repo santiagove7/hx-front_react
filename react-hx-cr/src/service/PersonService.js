@@ -1,4 +1,5 @@
 import axios from 'axios';
+import swal from 'sweetalert';
 
 export class PersonService{
     url = "http://localhost:8080/api/"
@@ -7,7 +8,12 @@ export class PersonService{
     }
 
     save(person){
-        return axios.post(this.url + "save", person).then(res => res.data);
+        try {
+            return axios.post(this.url + "save", person).then(res => res.data);        
+        } catch (error) {
+            return swal("No");
+        }
+        
     }
 
     leap(birth){

@@ -8,7 +8,7 @@ import {Dialog} from 'primereact/dialog';
 import {InputText} from 'primereact/inputtext';
 import {Button} from 'primereact/button';
 import {Toast} from 'primereact/toast';
-
+import swal from 'sweetalert';
 import 'primereact/resources/themes/nova/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -62,62 +62,54 @@ export default class App extends Component{
   }
 
   save(){
-    this.personService.save(this.state.person).then(data => {
-      this.setState({
-        visible : false,
-        person: {
-          id: null,
-          name: null,
-          lastname: null,
-          email: null,
-          birth: null
-        }
-      });
-      this.Toast.current.show({
+    if (this.state.person.name!=null && this.state.person.lastname!=null && this.state.person.email!=null && this.state.person.birth!=null){
+      this.personService.save(this.state.person).then(data => {
+        this.setState({
+          visible : false,
+          person: {
+            id: null,
+            name: null,
+            lastname: null,
+            email: null,
+            birth: null
+          }
+        });
+        swal("Person registered succesfully");
+        this.personService.getAll().then(data => this.setState({persons: data}))
+      })
 
-        severity: "Success",
-  
-        summary: "Attention!",
-  
-        detail: "Person registered succesfully",
-  
-      });
-      this.personService.getAll().then(data => this.setState({persons: data}))
-    })
+    } else {
+      swal("All the fields are required");
+    }
   }
 
   leap(){
     this.personService.leap(this.state.selectedPerson.birth).then(data => {
       console.log(data);
-      this.Toast.current.show({
-
-        severity: "Leap",
-  
-        summary: "Leap:",
-  
-        detail: "Year of birth is leap? = " + data,
-
-        sticky: true,
-  
-      })
+      if (data === true){
+        swal ("The year of birth of " + this.state.selectedPerson.name  + "("+this.state.selectedPerson.birth+")" + " is leap");
+      } else {
+        swal ("The year of birth of " + this.state.selectedPerson.name  + "("+this.state.selectedPerson.birth+")" + " is NOT leap");
+      }
     })
   }
+
 
   render(){
     return (
       <div>
         <Menubar model={this.items}/>
-        <DataTable value={this.state.persons} selectionMode="single" selection={this.state.selectedPerson} onSelectionChange={e => this.setState({selectedPerson: e.value})}>
+        <DataTable value={this.state.persons} paginator={true} rows="8" selectionMode="single" selection={this.state.selectedPerson} onSelectionChange={e => this.setState({selectedPerson: e.value})}>
           <Column field="id" header="ID"></Column>
           <Column field="name" header="Name"></Column>
           <Column field="lastname" header="Last Name"></Column>
           <Column field="email" header="Email"></Column>
           <Column field="birth" header="Year of Birth"></Column>
         </DataTable>
-        <Dialog header="New Person" visible={this.state.visible} style={{width: '400px'}} footer={this.footer} modal={true} onHide={() => this.setState({visible : false})}>
+        <Dialog header="New Person" visible={this.state.visible} style={{width: '400px'}} footer={this.footer} modal={true} onHide={() => this.setState({visible : false})} >
           <form id='create-form'>
             <span className='p-float-label'>
-              <InputText value={this.state.person.name} style={{width : '100%'}} id="name" onChange={(e) => {
+              <InputText value={this.state.person.name} style={{width : '100%'}}  id="name" onChange={(e) => {
                   let val = e.target.value;
                   this.setState(prevState => {
                   let person = Object.assign({}, prevState.person)
